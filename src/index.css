@@ -1,0 +1,40 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+}
+
+@layer base {
+  html, body, #root { height: 100%; }
+  body {
+    background: #fff;
+    color: var(--color-stone-900);
+    -webkit-font-smoothing: antialiased;
+    font-feature-settings: "cv11", "ss01";
+    overscroll-behavior-y: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+  input, textarea, select, button { font: inherit; color: inherit; }
+  input:focus, textarea:focus, select:focus, button:focus { outline: none; }
+  ::placeholder { color: var(--color-stone-400); }
+  input[type="date"], input[type="time"] { -webkit-appearance: none; appearance: none; min-height: 2.25rem; }
+  input[type="date"]::-webkit-calendar-picker-indicator, input[type="time"]::-webkit-calendar-picker-indicator { opacity: 0.5; }
+}
+
+@layer components {
+  .focus-ring:focus-visible { box-shadow: 0 0 0 2px rgb(28 25 23 / 0.15); }
+  .safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+  .checkbox {
+    width: 18px; height: 18px; flex-shrink: 0; border-radius: 9999px;
+    border: 1.5px solid var(--color-stone-300); background: #fff;
+    display: flex; align-items: center; justify-content: center;
+    transition: border-color 150ms, background-color 150ms;
+  }
+  .checkbox:hover { border-color: var(--color-stone-500); }
+  .checkbox.checked { background: var(--color-stone-900); border-color: var(--color-stone-900); }
+}
+
+.fade-in { animation: fade-in 140ms ease-out; }
+@keyframes fade-in { from { opacity: 0; transform: translateY(2px); } to { opacity: 1; transform: none; } }
+.slide-up { animation: slide-up 220ms cubic-bezier(.2,.8,.2,1); }
+@keyframes slide-up { from { transform: translateY(100%); } to { transform: none; } }
