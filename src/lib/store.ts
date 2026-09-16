@@ -103,7 +103,7 @@ class Store {
         loadError: null,
         areas: sortBy(data.areas),
         projects: sortBy(data.projects),
-        tasks: sortBy(data.tasks),
+        tasks: sortBy(data.tasks.map((t) => ({ ...t, progress: t.progress || 'not_started' }))),
         sync: this.queue.length ? this.state.sync : 'idle',
       });
     } catch (e) {
@@ -147,6 +147,7 @@ class Store {
       created_at: now,
       completed_at: '',
       updated_at: '',
+      progress: partial.progress || 'not_started',
     };
     this.set({ tasks: [...this.state.tasks, task] });
     this.enqueue({ kind: 'create', task });
@@ -184,6 +185,7 @@ class Store {
         created_at: now,
         completed_at: '',
         updated_at: '',
+        progress: 'not_started',
       };
       this.set({ tasks: [...this.state.tasks, next] });
     }
