@@ -1,5 +1,6 @@
 export type Priority = 'none' | 'low' | 'medium' | 'high';
 export type Status = 'open' | 'done';
+export type Progress = 'not_started' | 'started' | 'in_progress' | 'paused' | 'partial';
 
 export interface Subtask {
   id: string;
@@ -25,6 +26,7 @@ export interface Task {
   created_at: string;
   completed_at: string;
   updated_at: string;
+  progress: Progress;
 }
 
 export interface Project {
