@@ -16,7 +16,7 @@ var SHEETS = {
   Tasks: [
     'id', 'title', 'notes', 'area_id', 'project_id', 'due_date', 'due_time',
     'priority', 'status', 'subtasks', 'recurrence', 'sort_order',
-    'created_at', 'completed_at', 'updated_at'
+    'created_at', 'completed_at', 'updated_at', 'progress'
   ],
   Projects: ['id', 'name', 'area_id', 'sort_order', 'archived', 'created_at', 'updated_at'],
   Areas: ['id', 'name', 'sort_order', 'archived', 'created_at', 'updated_at']
@@ -24,6 +24,8 @@ var SHEETS = {
 
 var NUMERIC = { sort_order: true };
 var BOOLEAN = { archived: true };
+
+var PROGRESS = { not_started: 1, started: 1, in_progress: 1, paused: 1, partial: 1 };
 
 var DEFAULT_AREAS = ['Work', 'Personal', 'Family', 'Properties', 'Business', 'Finance', 'Ideas'];
 
@@ -37,10 +39,8 @@ function setup() {
     var sheet = ss.getSheetByName(name);
     if (!sheet) sheet = ss.insertSheet(name);
     var headers = SHEETS[name];
-    var first = sheet.getRange(1, 1, 1, headers.length).getValues()[0];
-    if (first.join('') !== headers.join('')) {
-      sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
-    }
+    // Always rewrite the header row so new columns get added to existing sheets.
+    sheet.getRange(1, 1, 1, headers.length).setValues([headers]);
     // Plain-text format so Sheets never turns "2026-09-10" into a Date
     // or "09:00" into a time.
     sheet.getRange(1, 1, sheet.getMaxRows(), headers.length).setNumberFormat('@');
@@ -194,7 +194,8 @@ var ACTIONS = {
           sort_order: row.sort_order,
           created_at: now,
           completed_at: '',
-          updated_at: now
+          updated_at: now,
+          progress: 'not_started'
         };
         appendRow_('Tasks', next);
         result.next = next;
@@ -386,6 +387,7 @@ function normalizeTask_(t) {
   out.recurrence = parseRecurrence_(out.recurrence) ? out.recurrence : '';
   out.sort_order = out.sort_order === '' || out.sort_order === undefined || out.sort_order === null ? null : Number(out.sort_order);
   out.completed_at = out.status === 'done' ? (out.completed_at || '') : '';
+  out.progress = PROGRESS[out.progress] ? out.progress : 'not_started';
   return out;
 }
 
@@ -403,6 +405,7 @@ function fromCell_(h, v) {
   }
   if (BOOLEAN[h]) return v === true || String(v).toUpperCase() === 'TRUE';
   if (NUMERIC[h]) return v === '' || v === null ? 0 : Number(v);
+  if (h === 'progress') return PROGRESS[v] ? String(v) : 'not_started';
   if (v instanceof Date) {
     // Defensive: if Sheets parsed a value as a date anyway.
     if (h === 'due_time') return Utilities.formatDate(v, Session.getScriptTimeZone(), 'HH:mm');
