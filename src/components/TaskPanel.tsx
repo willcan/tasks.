@@ -3,6 +3,7 @@ import type { Area, Priority, Project, Task } from '../types';
 import { formatTimestamp, longDate } from '../lib/dates';
 import { parseRecurrence, serializeRecurrence, type Unit } from '../lib/recurrence';
 import { uuid } from '../lib/store';
+import { PROGRESS } from '../lib/progress';
 import { Check, Plus, Trash, X } from './Icons';
 
 interface Props {
@@ -142,6 +143,33 @@ export default function TaskPanel({ task, areas, projects, onChange, onComplete,
                   {p.label}
                 </button>
               ))}
+            </div>
+          </Field>
+          <Field label="Progress">
+            <div className="flex flex-wrap gap-1">
+              {PROGRESS.map((p) => (
+                <button
+                  key={p.value}
+                  type="button"
+                  onClick={() => onChange({ progress: p.value })}
+                  className={`rounded-md border px-2.5 py-1 text-[12.5px] transition ${
+                    !done && task.progress === p.value
+                      ? 'border-stone-900 bg-stone-900 text-white'
+                      : 'border-stone-200 text-stone-600 hover:border-stone-400'
+                  }`}
+                >
+                  {p.label}
+                </button>
+              ))}
+              <button
+                type="button"
+                onClick={done ? undefined : onComplete}
+                className={`rounded-md border px-2.5 py-1 text-[12.5px] transition ${
+                  done ? 'border-stone-900 bg-stone-900 text-white' : 'border-stone-200 text-stone-600 hover:border-stone-400'
+                }`}
+              >
+                Completed
+              </button>
             </div>
           </Field>
           <Field label="Repeat">

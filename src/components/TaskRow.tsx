@@ -3,6 +3,7 @@ import { CSS } from '@dnd-kit/utilities';
 import type { Task } from '../types';
 import { formatTime, formatTimestamp, shortDate, today } from '../lib/dates';
 import { Check, Notes, Repeat } from './Icons';
+import { progressLabel } from '../lib/progress';
 
 interface Props {
   task: Task;
@@ -29,6 +30,7 @@ export default function TaskRow({ task, projectName, areaName, selected, showDat
   const overdue = !done && task.due_date && task.due_date < today();
   const subDone = task.subtasks.filter((s) => s.done).length;
   const context = projectName || areaName;
+  const progressing = !done && task.progress !== 'not_started';
 
   return (
     <li
@@ -50,14 +52,17 @@ export default function TaskRow({ task, projectName, areaName, selected, showDat
         onPointerDown={(e) => e.stopPropagation()}
         className={`checkbox mt-[3px] ${done ? 'checked' : ''}`}
       >
-        <Check width={11} height={11} className={`text-white transition-opacity ${done ? 'opacity-100' : 'opacity-0 group-hover:opacity-100 group-hover:text-stone-300'}`} />
+        {progressing && !done ? (
+          <span className={`size-2 rounded-full group-hover:hidden ${task.progress === 'paused' ? 'bg-stone-300' : 'bg-stone-700'}`} />
+        ) : null}
+        <Check width={11} height={11} className={`text-white transition-opacity ${done ? 'opacity-100' : progressing ? 'hidden group-hover:block group-hover:text-stone-300' : 'opacity-0 group-hover:opacity-100 group-hover:text-stone-300'}`} />
       </button>
       <div className="min-w-0 flex-1">
         <div className="flex items-baseline gap-2 min-w-0">
           {task.priority !== 'none' && <span className={`mt-1 size-1.5 shrink-0 self-center rounded-full ${PRIORITY_DOT[task.priority]}`} />}
           <span className={`truncate text-[15px] leading-6 ${done ? 'text-stone-400 line-through decoration-stone-300' : ''}`}>{task.title}</span>
         </div>
-        {(context || (showDate && task.due_date) || task.notes || task.subtasks.length > 0 || task.recurrence || showCompleted) && (
+        {(context || (showDate && task.due_date) || task.notes || task.subtasks.length > 0 || task.recurrence || showCompleted || progressing) && (
           <div className="mt-0.5 flex flex-wrap items-center gap-x-2.5 gap-y-0.5 text-[12.5px] leading-4 text-stone-400">
             {showCompleted && task.completed_at && <span>Completed {formatTimestamp(task.completed_at)}</span>}
             {showDate && task.due_date && (
@@ -67,6 +72,7 @@ export default function TaskRow({ task, projectName, areaName, selected, showDat
               </span>
             )}
             {!showDate && task.due_time && <span className="text-stone-500">{formatTime(task.due_time)}</span>}
+            {progressing && <span className="text-stone-500">{progressLabel(task.progress)}</span>}
             {context && <span className="truncate">{context}</span>}
             {task.subtasks.length > 0 && (
               <span>
